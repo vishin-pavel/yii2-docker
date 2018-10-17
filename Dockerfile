@@ -35,6 +35,7 @@ RUN usermod --non-unique --uid 1000 www-data && \
             openssh-client \
             nano \
             unzip \
+            libmcrypt-dev\
         --no-install-recommends && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -61,10 +62,12 @@ RUN docker-php-ext-configure gd \
 # see http://stackoverflow.com/a/8154466/291573) for usage of `printf`
 RUN printf "\n" | pecl install \
         imagick \
-        mongodb && \
+        mongodb \
+        mcrypt-1.0.1 && \
         docker-php-ext-enable \
         imagick \
-        mongodb
+        mongodb \
+        mcrypt
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
