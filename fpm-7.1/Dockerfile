@@ -56,18 +56,17 @@ RUN docker-php-ext-configure gd \
         intl \
         opcache \
         pdo_mysql \
-        pdo_pgsql
+        pdo_pgsql \
+        mcrypt
 
 # Install PECL extensions
 # see http://stackoverflow.com/a/8154466/291573) for usage of `printf`
 RUN printf "\n" | pecl install \
         imagick \
-        mongodb \
-        mcrypt-1.0.1 && \
+        mongodb && \
         docker-php-ext-enable \
         imagick \
-        mongodb \
-        mcrypt
+        mongodb
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
