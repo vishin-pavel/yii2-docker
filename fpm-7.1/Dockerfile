@@ -1,4 +1,4 @@
-FROM php:fpm
+FROM php:7.1-fpm
 # Install system packages for PHP extensions recommended for Yii 2.0 Framework
 ENV DEBIAN_FRONTEND=noninteractive \
     PHP_USER_ID=33 \
