@@ -1,4 +1,4 @@
-FROM php:7.1-fpm
+FROM php:7.2-fpm
 # Install system packages for PHP extensions recommended for Yii 2.0 Framework
 ENV DEBIAN_FRONTEND=noninteractive \
     PHP_USER_ID=33 \
@@ -8,9 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_PRESTISSIMO_PLUGIN=^0.3.7 \
     COMPOSER_ALLOW_SUPERUSER=1
 
-RUN usermod --non-unique --uid 1000 www-data && \
-    groupmod --non-unique --gid 1000 www-data &&\
-    apt-get update && \
+RUN apt-get update && \
     apt-get -y install \
         gnupg2 && \
     apt-key update && \
@@ -80,4 +78,8 @@ RUN composer global require --optimize-autoloader \
     composer global dumpautoload --optimize && \
     composer clear-cache
 # Application environment
+RUN mkdir -p /app-data; \
+    chown www-data:www-data /app-data; \
+    mkdir -p /app; \
+    chown www-data:www-data /app; 
 WORKDIR /app
