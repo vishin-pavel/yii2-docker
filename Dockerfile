@@ -1,4 +1,4 @@
-FROM php:fpm
+FROM php:7.3-fpm-alpine
 # Install system packages for PHP extensions recommended for Yii 2.0 Framework
 ENV DEBIAN_FRONTEND=noninteractive \
     PHP_USER_ID=33 \
@@ -8,40 +8,46 @@ ENV DEBIAN_FRONTEND=noninteractive \
     VERSION_PRESTISSIMO_PLUGIN=^0.3.7 \
     COMPOSER_ALLOW_SUPERUSER=1
 
-RUN usermod --non-unique --uid 1000 www-data && \
-    groupmod --non-unique --gid 1000 www-data &&\
-    apt-get update && \
-    apt-get -y install \
-        gnupg2 && \
-    apt-key update && \
-    apt-get update && \
-    apt-get -y install \
-            g++ \
-            git \
-            curl \
-            imagemagick \
-            libfreetype6-dev \
-            libcurl3-dev \
-            libicu-dev \
-            libfreetype6-dev \
-            libjpeg-dev \
-            libjpeg62-turbo-dev \
-            libmagickwand-dev \
-            libpq-dev \
-            libpng-dev \
-            libxml2-dev \
-            zlib1g-dev \
-            mysql-client \
-            openssh-client \
-            nano \
-            unzip \
-            libmcrypt-dev\
-        --no-install-recommends && \
-        apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install PHP extensions required for Yii 2.0 Framework
-RUN docker-php-ext-configure gd \
+RUN apk --update --virtual build-deps add \
+        autoconf \
+        make \
+        gcc \
+        g++ \
+        libtool \
+        icu-dev \
+        curl-dev \
+        freetype-dev \
+        imagemagick-dev \
+        pcre-dev \
+        postgresql-dev \
+        libmcrypt-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libxml2-dev && \
+    apk add \
+        libzip-dev \
+        git \
+        curl \
+        bash \
+        bash-completion \
+        icu \
+        imagemagick \
+        pcre \
+        freetype \
+        libmcrypt \
+        libintl \
+        libjpeg-turbo \
+        libpng \
+        libltdl \
+        libxml2 \
+        mysql-client \
+        postgresql && \
+    pecl install \
+        apcu \
+        imagick \
+        mcrypt-1.0.0 && \
+    docker-php-ext-configure gd \
+        --with-gd \
         --with-freetype-dir=/usr/include/ \
         --with-png-dir=/usr/include/ \
         --with-jpeg-dir=/usr/include/ && \
@@ -53,21 +59,14 @@ RUN docker-php-ext-configure gd \
         bcmath \
         exif \
         gd \
+        iconv \
         intl \
+        mbstring \
         opcache \
         pdo_mysql \
-        pdo_pgsql
-
-# Install PECL extensions
-# see http://stackoverflow.com/a/8154466/291573) for usage of `printf`
-RUN printf "\n" | pecl install \
-        imagick \
-        mongodb \
-        mcrypt-1.0.1 && \
-        docker-php-ext-enable \
-        imagick \
-        mongodb \
-        mcrypt
+        pdo_pgsql && \
+    apk del \
+        build-deps
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
@@ -81,4 +80,8 @@ RUN composer global require --optimize-autoloader \
     composer global dumpautoload --optimize && \
     composer clear-cache
 # Application environment
+RUN mkdir -p /app-data; \
+    chown www-data:www-data /app-data; \
+    mkdir -p /app; \
+    chown www-data:www-data /app; 
 WORKDIR /app
